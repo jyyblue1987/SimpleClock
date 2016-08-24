@@ -1,6 +1,7 @@
 package com.timezone.simpleclock;
 
 import android.content.Context;
+
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -49,7 +50,6 @@ public class MainActivity extends AppCompatActivity {
     private void initData()
     {
         getCountryList();
-        getLocalTime();
         getTimeZone();
     }
 
@@ -90,25 +90,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-    private void getLocalTime()
-    {
-        Date date = new Date();
 
-        SimpleDateFormat sdf =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//        TimeZone tz = TimeZone.getDefault();
-//        sdf.setTimeZone(tz);
-
-        String newDateStr = sdf.format(date);
-
-        System.out.println(newDateStr);
-
-    }
     private void getTimeZone()
     {
         Date date = new Date();
 
         List<JSONObject> list = new ArrayList<JSONObject>();
         String[] ids= TimeZone.getAvailableIDs();
+
         for(int i=0;i<ids.length;i++)
         {
             TimeZone d= TimeZone.getTimeZone(ids[i]);
@@ -147,6 +136,8 @@ public class MainActivity extends AppCompatActivity {
         m_listItems.setAdapter(m_adapterList);
 
     }
+
+
 
     class TimezonListAdapter extends MyListAdapter{
 
