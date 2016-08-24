@@ -10,6 +10,8 @@ import android.widget.TextView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
@@ -39,20 +41,32 @@ public class MainActivity extends AppCompatActivity {
 
     private void initData()
     {
+        getLocalTime();
         getTimeZone();
     }
 
+    private void getLocalTime()
+    {
+        Date date = new Date();
+
+        SimpleDateFormat sdf =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//        TimeZone tz = TimeZone.getDefault();
+//        sdf.setTimeZone(tz);
+
+        String newDateStr = sdf.format(date);
+
+        System.out.println(newDateStr);
+
+    }
     private void getTimeZone()
     {
+        Date date = new Date();
+
         List<JSONObject> list = new ArrayList<JSONObject>();
         String[] ids= TimeZone.getAvailableIDs();
         for(int i=0;i<ids.length;i++)
         {
-            System.out.println("Availalbe ids.................."+ids[i]);
             TimeZone d= TimeZone.getTimeZone(ids[i]);
-            System.out.println("time zone."+d.getDisplayName());
-            System.out.println("savings."+d.getDSTSavings());
-            System.out.println("offset."+d.getRawOffset());
 
             /////////////////////////////////////////////////////
             if (!ids[i].matches(".*/.*")) {
@@ -65,12 +79,17 @@ public class MainActivity extends AppCompatActivity {
             String sign = d.getRawOffset() >= 0 ? "+" : "-";
 
             String timeZonePretty = String.format("(UTC %s %02d:%02d) %s", sign, hours, minutes, region);
-            System.out.println(timeZonePretty);
             //////////////////////////////////////////////////////////////////
+
+            SimpleDateFormat sdf =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            sdf.setTimeZone(d);
+            String localtime = sdf.format(date);
+
 
             JSONObject timezone = new JSONObject();
             try {
                 timezone.put("timezone", timeZonePretty);
+                timezone.put("localtime", localtime);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -97,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
             final JSONObject item = getItem(position);
 
             ((TextView)ViewHolder.get(rowView, R.id.txt_timezone_name)).setText(item.optString("timezone"));
+            ((TextView)ViewHolder.get(rowView, R.id.txt_timezone_time)).setText(item.optString("localtime"));
         }
     }
 }
