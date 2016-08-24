@@ -1,7 +1,6 @@
 package com.timezone.simpleclock;
 
 import android.content.Context;
-
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -10,7 +9,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     ListView m_listItems	= null;
     MyListAdapter m_adapterList = null;
     ArrayList<String> m_countryList = null;
+    JSONObject      m_countryCode = new JSONObject();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
     private void initData()
     {
         getCountryList();
-        getTimeZone();
+//        getTimeZone('');
     }
 
     private void getCountryList()
@@ -61,27 +60,40 @@ public class MainActivity extends AppCompatActivity {
             String country = locale.getDisplayCountry();
             if (country.trim().length()>0 && !countries.contains(country)) {
                 countries.add(country);
+                try {
+                    m_countryCode.put(country, locale.getCountry());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         }
         Collections.sort(countries);
 
+        int default_country_num = 0;
+        int i = 0;
         m_countryList = new ArrayList<String>();
         for (String country : countries) {
             System.out.println(country);
             m_countryList.add(country);
+            if( country.equals("United States") )
+                default_country_num = i;
+            i++;
         }
 
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_spinner_dropdown_item, m_countryList);
-        //스피너 속성
+
         Spinner sp = (Spinner) this.findViewById(R.id.spinner_country);
         sp.setPrompt("Select Country"); //
         sp.setAdapter(adapter);
         sp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                Toast.makeText(MainActivity.this, m_countryList.get(i), Toast.LENGTH_LONG).show();
+//                Toast.makeText(MainActivity.this, i + "", Toast.LENGTH_LONG).show();
+                String countryName = m_countryList.get(i);
+                String countryCode = m_countryCode.optString(countryName);
+                getTimeZone(countryCode);
             }
 
             @Override
@@ -89,14 +101,18 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        sp.setSelection(default_country_num);
     }
 
-    private void getTimeZone()
+    private void getTimeZone(String countryCode)
     {
         Date date = new Date();
 
         List<JSONObject> list = new ArrayList<JSONObject>();
-        String[] ids= TimeZone.getAvailableIDs();
+//        String[] ids= TimeZone.getAvailableIDs();
+
+        String[] ids = com.ibm.icu.util.TimeZone.getAvailableIDs(countryCode);
 
         for(int i=0;i<ids.length;i++)
         {
